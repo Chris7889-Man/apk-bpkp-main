@@ -18,6 +18,8 @@ export default {
                 '2xs': ['0.70rem', { lineHeight: '1.25' }],
                 xs: ['0.78rem', { lineHeight: '1.5' }],
                 sm: ['0.91rem', { lineHeight: '1.5' }],
+                'text-xs': ['0.875rem', { lineHeight: '1.5rem' }],
+                'text-sm': ['1rem', { lineHeight: '1.5rem' }],
             },
         },
     },
