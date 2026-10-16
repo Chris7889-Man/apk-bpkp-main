@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        font-size: 17px;
+    }
+
+    @media (max-width: 639px) {
+        html {
+            font-size: 16px;
+        }
+    }
+
+    @media (min-width: 1536px) {
+        html {
+            font-size: 18px;
+        }
+    }
+}
+
+@layer components {
+    button,
+    input,
+    select,
+    textarea {
+        min-height: 2.75rem;
+    }
+}
+
+@layer utilities {
+    /* Auto-scale classes that were too small */
+    .text-\[8px\] {
+        font-size: 0.70rem !important; /* 12px roughly */
+    }
+    .text-\[10px\] {
+        font-size: 0.75rem !important;
+    }
+    .text-\[11px\] {
+        font-size: 0.78rem !important;
+    }
+}
