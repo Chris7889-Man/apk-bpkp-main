@@ -71,7 +71,7 @@
             </button>
 
             {{-- Avatar + nama (dropdown profil) --}}
-            <div class="hidden sm:block">
+            <div>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button type="button" style="display: flex; align-items: center; gap: 12px; background: none; border: 0; cursor: pointer; padding: 0;">

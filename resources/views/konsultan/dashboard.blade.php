@@ -121,10 +121,12 @@
         document.addEventListener('DOMContentLoaded', function () {
             const userId = {{ auth()->id() }};
 
-            window.Echo.private(`user.${userId}`)
-                .listen('.AktivitasKonsultasi', () => {
-                    window.location.reload();
-                });
+            if (window.Echo) {
+                window.Echo.private(`user.${userId}`)
+                    .listen('.AktivitasKonsultasi', () => {
+                        window.location.reload();
+                    });
+            }
 
             const inputCari = document.getElementById('cari-konsultasi');
             const daftar = document.getElementById('daftar-konsultasi');
