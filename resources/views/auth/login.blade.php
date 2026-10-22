@@ -29,7 +29,7 @@
         }
 
         .inputForm {
-            border: 1.5px solid #9ca3af;
+            border: 2px solid #9ca3af;
             border-radius: 10px;
             height: 50px;
             display: flex;
@@ -37,7 +37,8 @@
             padding-left: 12px;
             padding-right: 12px;
             transition: 0.2s ease-in-out;
-            background: #fff;
+            background: #f9fafb;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06);
         }
 
         .input {
@@ -55,16 +56,21 @@
         }
 
         .inputForm:focus-within {
-            border: 1.5px solid #6b7280;
-            box-shadow: none;
+            border: 2px solid #2d79f3;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(45, 121, 243, 0.15);
+        }
+
+        .input {
+            background: transparent;
         }
 
         .input:-webkit-autofill,
         .input:-webkit-autofill:hover,
         .input:-webkit-autofill:focus {
             -webkit-text-fill-color: #151717;
-            -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
-            box-shadow: 0 0 0 1000px #ffffff inset;
+            -webkit-box-shadow: 0 0 20 1000px #ffffff inset;
+            box-shadow: 0 0 5 1000px #ffffff inset;
             transition: background-color 5000s ease-in-out 0s;
         }
 
@@ -260,7 +266,7 @@
                 <svg height="20" viewBox="-64 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg" fill="#6b7280">
                     <path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0"></path>
                     <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
-                </svg>        
+                </svg>
                 <input type="password" id="password" name="password" class="input pr-8" placeholder="Enter your Password" required autocomplete="current-password">
                 <button type="button" onclick="togglePassword()" class="absolute right-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none bg-transparent border-0 cursor-pointer" aria-label="Tampilkan password">
                     <svg viewBox="0 0 576 512" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor">

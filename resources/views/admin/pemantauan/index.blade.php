@@ -99,4 +99,25 @@
             </section>
         </div>
     </div>
+
+      <script>
+        (function () {
+            var button = document.getElementById('userMenuButton');
+            var dropdown = document.getElementById('userMenuDropdown');
+            var wrapper = document.getElementById('userMenuWrapper');
+
+            button.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var isOpen = dropdown.style.display === 'block';
+                dropdown.style.display = isOpen ? 'none' : 'block';
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!wrapper.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        })();
+    </script>
+ 
 </x-app-layout>
