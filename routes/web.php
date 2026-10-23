@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/konsultasi/{konsultasi}', [KonsultasiController::class, 'destroy'])->name('konsultasi.destroy');
     Route::post('/konsultasi/{konsultasi}/pesan', [PesanController::class, 'store'])->name('pesan.store');
     Route::delete('/konsultasi/{konsultasi}/pesan/{pesan}', [PesanController::class, 'destroy'])->name('pesan.destroy');
+Route::patch('/konsultasi/{konsultasi}/pesan/{pesan}', [PesanController::class, 'edit'])->name('pesan.edit');
     Route::delete('/konsultasi/{konsultasi}/pesan', [PesanController::class, 'clear'])->name('pesan.clear');
 
     // Admin

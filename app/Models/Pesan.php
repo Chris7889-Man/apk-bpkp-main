@@ -53,4 +53,18 @@ class Pesan extends Model
 
         return false;
     }
+
+    public function isVideo(): bool
+    {
+        if ($this->file_tipe && str_starts_with($this->file_tipe, 'video/')) {
+            return true;
+        }
+
+        if ($this->file_nama) {
+            $ext = strtolower(pathinfo($this->file_nama, PATHINFO_EXTENSION));
+            return in_array($ext, ['mp4', 'webm', 'ogg', 'mov', 'avi']);
+        }
+
+        return false;
+    }
 }

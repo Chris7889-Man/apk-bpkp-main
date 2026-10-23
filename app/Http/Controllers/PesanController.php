@@ -32,7 +32,7 @@ class PesanController extends Controller
         $validated = $request->validate([
             'isi_pesan' => 'nullable|string|max:2000',
             'balas_ke_id' => 'nullable|exists:pesans,id',
-            'file' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,zip',
+            'file' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,ppt,pptx,xls,xlsx,zip,mp4,webm,ogg,mov,avi,mp3,wav,aac,flac,m4a',
         ]);
 
         if (empty($validated['isi_pesan']) && !$request->hasFile('file')) {
@@ -112,6 +112,31 @@ class PesanController extends Controller
         $pesan->update(['disembunyikan_oleh_pengirim' => true]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function edit(Konsultasi $konsultasi, Pesan $pesan, Request $request)
+    {
+        $user = Auth::user();
+
+        abort_unless($pesan->konsultasi_id === $konsultasi->id, 404);
+        abort_unless($pesan->pengirim_id === $user->id, 403);
+
+        $validated = $request->validate([
+            'isi_pesan' => 'nullable|string|max:2000',
+        ]);
+
+        if (empty($validated['isi_pesan'])) {
+            return response()->json(['success' => false, 'message' => 'Isi pesan tidak boleh kosong.'], 422);
+        }
+
+        $pesan->update(['isi_pesan' => $validated['isi_pesan']]);
+        $pesan->load('balasKe.pengirim');
+
+        return response()->json([
+            'success' => true,
+            'isi_pesan_baru' => $pesan->isi_pesan,
+            'pengirim_nama' => $pesan->balasKe?->pengirim->name ?? '',
+        ]);
     }
 
     public function clear(Konsultasi $konsultasi)

@@ -42,11 +42,7 @@
         </div>
     </div>
 
-    <div class="px-4 py-2 bg-blue-50/60 border-b border-blue-100">
-        <p class="text-xs text-blue-600 text-center">
-            Geser kanan (atau klik ikon ↩ di laptop) untuk membalas &middot; klik kanan/tekan-tahan pesan sendiri untuk menghapus
-        </p>
-    </div>
+    {{--  --}}
 
     <div class="flex-1 overflow-y-auto p-5 flex flex-col gap-3 bg-gray-50" id="chat-box">
 
@@ -90,8 +86,12 @@
                                 <img src="{{ asset('storage/' . $pesan->file_path) }}" class="rounded-lg max-w-full mb-1.5" alt="{{ $pesan->file_nama }}"
                                 onerror="window.retryGambar(this)">
                             </a>
+                        @elseif (str_starts_with($pesan->file_tipe, 'video/'))
+                            <video src="{{ asset('storage/' . $pesan->file_path) }}" class="rounded-lg max-w-full mb-1.5" controls preload="metadata"></video>
+                        @elseif (str_starts_with($pesan->file_tipe, 'audio/'))
+                            <audio src="{{ asset('storage/' . $pesan->file_path) }}" class="w-full mb-1.5" controls preload="metadata"></audio>
                         @else
-                            <a href="{{ asset('storage/' . $pesan->file_path) }}" target="_blank"
+                            <a href="{{ asset('storage/' . $pesan->file_path) }}" target="_blank" download
                                 class="flex items-center gap-2 mb-1.5 px-3 py-2 rounded-lg {{ $pesan->pengirim_id === auth()->id() ? 'bg-blue-700/60' : 'bg-gray-100' }}">
                                 <span>📎</span>
                                 <span class="text-xs truncate">{{ $pesan->file_nama }}</span>
@@ -99,13 +99,24 @@
                         @endif
                     @endif
 
-                    @if ($pesan->isi_pesan)
-                        <p class="text-sm leading-relaxed pesan-isi">{{ $pesan->isi_pesan }}</p>
+                            @if ($pesan->isi_pesan)
+                        <div class="flex justify-between items-start gap-3">
+                            <p class="text-sm leading-relaxed pesan-isi flex-1">{{ $pesan->isi_pesan }}</p>
+                            @if ($pesan->pengirim_id === auth()->id())
+                                <div class="relative message-actions">
+                                    <button type="button" class="edit-menu text-xs opacity-70 cursor-pointer px-1 select-none font-bold" title="Pilihan pesan">⋮</button>
+                                    <div class="message-menu hidden absolute right-0 bottom-full mb-1 bg-white text-gray-700 rounded-lg shadow-lg border border-gray-200 z-20 w-24">
+                                        <button type="button" class="message-edit block w-full text-left px-3 py-2 text-xs hover:bg-gray-100">Edit</button>
+                                        <button type="button" class="message-delete block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-gray-100">Hapus</button>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
                     @endif
                     <p class="text-[10px] opacity-70 mt-1 text-right">
                         {{ $pesan->created_at->format('H:i') }}
                         @if ($pesan->pengirim_id === auth()->id())
-                            <span class="status-baca">{{ $pesan->dibaca_at ? ' · Dibaca' : '' }}</span>
+                            <span class="status-baca ml-1">{{ $pesan->dibaca_at ? '✓✓' : '✓' }}</span>
                         @endif
                     </p>
                 </div>
@@ -136,13 +147,18 @@
             </div>
         @endif
 
+        <div id="edit-preview" class="hidden mb-2 bg-yellow-50 border-l-4 border-yellow-400 px-3 py-2 rounded-lg flex justify-between items-center">
+            <p class="text-xs text-yellow-700">Mengedit pesan</p>
+            <button type="button" id="btn-batal-edit" class="text-gray-400 hover:text-red-500 text-sm">✕</button>
+        </div>
+
         <form id="form-pesan" class="flex gap-2 items-center pb-4">
-            <label for="input-file"
-                class="cursor-pointer w-10 h-10 shrink-0 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 transition text-lg {{ $konsultasi->status === 'selesai' ? 'opacity-40 pointer-events-none' : '' }}"
-                title="Kirim file/foto">
-                📎
+            <label for="input-file" class="cursor-pointer w-10 h-10 shrink-0 flex items-center justify-center {{ $konsultasi->status === 'selesai' ? 'opacity-40 pointer-events-none' : '' }}" title="Attach">
+                <svg class="stroke-black fill-none" xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 -0.5 25 25">
+                    <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" d="M15.17 11.053L11.18 15.315C10.8416 15.6932 10.3599 15.9119 9.85236 15.9178C9.34487 15.9237 8.85821 15.7162 8.51104 15.346C7.74412 14.5454 7.757 13.2788 8.54004 12.494L13.899 6.763C14.4902 6.10491 15.3315 5.72677 16.2161 5.72163C17.1006 5.71649 17.9463 6.08482 18.545 6.736C19.8222 8.14736 19.8131 10.2995 18.524 11.7L12.842 17.771C12.0334 18.5827 10.9265 19.0261 9.78113 18.9971C8.63575 18.9682 7.55268 18.4695 6.78604 17.618C5.0337 15.6414 5.07705 12.6549 6.88604 10.73L12.253 5"></path>
+                </svg>
             </label>
-            <input type="file" id="input-file" class="hidden" {{ $konsultasi->status === 'selesai' ? 'disabled' : '' }}>
+            <input type="file" id="input-file" class="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip" {{ $konsultasi->status === 'selesai' ? 'disabled' : '' }}>
             <input type="text" id="input-pesan" autocomplete="off"
                 class="flex-1 bg-gray-100 border-none rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Tulis pesan..."
@@ -191,8 +207,11 @@
         const replyNama = document.getElementById('reply-nama');
         const replyIsi = document.getElementById('reply-isi');
         const btnBatalReply = document.getElementById('btn-batal-reply');
+        const editPreview = document.getElementById('edit-preview');
+        const btnBatalEdit = document.getElementById('btn-batal-edit');
 
         let replyTarget = null;
+        let editTarget = null;
 
         function setReply(id, isi, nama) {
             replyTarget = { id, isi, nama };
@@ -228,6 +247,24 @@
             if (nama) {
                 const ext = nama.split('.').pop().toLowerCase();
                 return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+            }
+            return false;
+        }
+
+        function isVideoFile(tipe, nama) {
+            if (tipe && tipe.startsWith('video/')) return true;
+            if (nama) {
+                const ext = nama.split('.').pop().toLowerCase();
+                return ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(ext);
+            }
+            return false;
+        }
+
+        function isAudioFile(tipe, nama) {
+            if (tipe && tipe.startsWith('audio/')) return true;
+            if (nama) {
+                const ext = nama.split('.').pop().toLowerCase();
+                return ['mp3', 'wav', 'aac', 'flac', 'm4a'].includes(ext);
             }
             return false;
         }
@@ -284,10 +321,25 @@
                     img.onerror = function () { window.retryGambar(img); };
                     a.appendChild(img);
                     inner.appendChild(a);
+                } else if (isVideoFile(fileTipe, fileNama)) {
+                    const video = document.createElement('video');
+                    video.src = fileUrl;
+                    video.className = 'rounded-lg max-w-full mb-1.5';
+                    video.controls = true;
+                    video.preload = 'metadata';
+                    inner.appendChild(video);
+                } else if (isAudioFile(fileTipe, fileNama)) {
+                    const audio = document.createElement('audio');
+                    audio.src = fileUrl;
+                    audio.className = 'w-full mb-1.5';
+                    audio.controls = true;
+                    audio.preload = 'metadata';
+                    inner.appendChild(audio);
                 } else {
                     const a = document.createElement('a');
                     a.href = fileUrl;
                     a.target = '_blank';
+                    a.download = fileNama || 'File';
                     a.className = 'flex items-center gap-2 mb-1.5 px-3 py-2 rounded-lg ' +
                         (milikSendiri ? 'bg-blue-700/60' : 'bg-gray-100');
                     const span1 = document.createElement('span');
@@ -302,10 +354,45 @@
             }
 
             if (isiPesan) {
+                const pContainer = document.createElement('div');
+                pContainer.className = 'flex justify-between items-start';
+
                 const p1 = document.createElement('p');
-                p1.className = 'text-sm leading-relaxed pesan-isi';
+                p1.className = 'text-sm leading-relaxed pesan-isi flex-1';
                 p1.textContent = isiPesan;
-                inner.appendChild(p1);
+                pContainer.appendChild(p1);
+
+                if (milikSendiri) {
+                    const actions = document.createElement('div');
+                    actions.className = 'relative message-actions shrink-0';
+
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'edit-menu text-xs opacity-70 cursor-pointer px-1 select-none font-bold';
+                    btn.title = 'Pilihan pesan';
+                    btn.textContent = '⋮';
+
+                    const menu = document.createElement('div');
+                    menu.className = 'message-menu hidden absolute right-0 bottom-full mb-1 bg-white text-gray-700 rounded-lg shadow-lg border border-gray-200 z-20 w-24';
+
+                    const btnEdit = document.createElement('button');
+                    btnEdit.type = 'button';
+                    btnEdit.className = 'message-edit block w-full text-left px-3 py-2 text-xs hover:bg-gray-100';
+                    btnEdit.textContent = 'Edit';
+
+                    const btnHapus = document.createElement('button');
+                    btnHapus.type = 'button';
+                    btnHapus.className = 'message-delete block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-gray-100';
+                    btnHapus.textContent = 'Hapus';
+
+                    menu.appendChild(btnEdit);
+                    menu.appendChild(btnHapus);
+                    actions.appendChild(btn);
+                    actions.appendChild(menu);
+                    pContainer.appendChild(actions);
+                }
+
+                inner.appendChild(pContainer);
             }
 
             const p2 = document.createElement('p');
@@ -313,7 +400,8 @@
             p2.textContent = waktu;
             if (milikSendiri) {
                 const statusBaca = document.createElement('span');
-                statusBaca.className = 'status-baca';
+                statusBaca.className = 'status-baca ml-1';
+                statusBaca.textContent = '✓';
                 p2.appendChild(statusBaca);
             }
             inner.appendChild(p2);
@@ -334,11 +422,13 @@
         async function hapusPesan(id) {
             if (!confirm('Hapus pesan ini?')) return;
 
+            const socketId = window.Echo ? window.Echo.socketId() : '';
+
             await fetch(`/konsultasi/${konsultasiId}/pesan/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'X-Socket-ID': window.Echo.socketId(),
+                    'X-Socket-ID': socketId,
                 },
             });
 
@@ -435,11 +525,13 @@
         btnHapusSemua.addEventListener('click', async () => {
             if (!confirm('Hapus SEMUA chat di percakapan ini (hanya untuk kamu)? Tindakan ini tidak bisa dibatalkan.')) return;
 
+            const socketId = window.Echo ? window.Echo.socketId() : '';
+
             await fetch(`/konsultasi/${konsultasiId}/pesan`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'X-Socket-ID': window.Echo.socketId(),
+                    'X-Socket-ID': socketId,
                 },
             });
 
@@ -451,6 +543,15 @@
             if (statusSelesai) return;
 
             const isiPesan = input.value.trim();
+
+            // Mode edit: simpan perubahan lalu kembali ke mode kirim
+            if (editTarget) {
+                if (!isiPesan) return;
+                const berhasil = await editPesan(editTarget, isiPesan);
+                if (berhasil) batalEdit();
+                return;
+            }
+
             const file = inputFile.files[0] || null;
 
             if (!isiPesan && !file) return;
@@ -468,11 +569,13 @@
             if (balasKeIdSaatIni) formData.append('balas_ke_id', balasKeIdSaatIni);
             if (file) formData.append('file', file);
 
+            const socketId = window.Echo ? window.Echo.socketId() : '';
+
             const res = await fetch(`/konsultasi/${konsultasiId}/pesan`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'X-Socket-ID': window.Echo.socketId(),
+                    'X-Socket-ID': socketId,
                 },
                 body: formData,
             });
@@ -483,19 +586,111 @@
             }
         });
 
-        window.Echo.private(`konsultasi.${konsultasiId}`)
-            .listen('.PesanDikirim', (e) => {
-                if (e.pengirim_id === userId) return;
-                buatBubble(e.id, e.isi_pesan, e.waktu, e.pengirim_id, e.pengirim_nama, e.balas_ke, e.file_url, e.file_nama, e.file_tipe);
-            })
-            .listen('.PesanDibaca', (e) => {
-                if (e.pembaca_id === userId) return;
-                document.querySelectorAll('[data-milik-sendiri="1"] .status-baca').forEach(el => {
-                    el.textContent = ' · Dibaca';
+        if (window.Echo) {
+            window.Echo.private(`konsultasi.${konsultasiId}`)
+                .listen('.PesanDikirim', (e) => {
+                    if (e.pengirim_id === userId) return;
+                    buatBubble(e.id, e.isi_pesan, e.waktu, e.pengirim_id, e.pengirim_nama, e.balas_ke, e.file_url, e.file_nama, e.file_tipe);
+                })
+                .listen('.PesanDibaca', (e) => {
+                    if (e.pembaca_id === userId) return;
+                    document.querySelectorAll('[data-milik-sendiri="1"] .status-baca').forEach(el => {
+                        el.textContent = '✓✓';
+                    });
                 });
-            });
+        }
 
-        chatBox.scrollTop = chatBox.scrollHeight;
+        function editPesan(pesanId, isiBaru) {
+            return new Promise(async (resolve) => {
+                const socketId = window.Echo ? window.Echo.socketId() : '';
+                const res = await fetch(`/konsultasi/${konsultasiId}/pesan/${pesanId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Socket-ID': socketId,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ isi_pesan: isiBaru }),
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    alert('Gagal mengubah pesan: ' + (data.message || 'Kesalahan tidak diketahui'));
+                    resolve(false);
+                    return;
+                }
+
+                const wrapper = document.getElementById(`pesan-${pesanId}`);
+                if (wrapper) {
+                    wrapper.dataset.isi = isiBaru;
+                    const isiParagraf = wrapper.querySelector('.pesan-isi');
+                    if (isiParagraf) isiParagraf.textContent = isiBaru;
+                }
+                resolve(true);
+            });
+        }
+
+        function batalEdit() {
+            editTarget = null;
+            editPreview.classList.add('hidden');
+            input.value = '';
+            input.disabled = false;
+            input.placeholder = 'Tulis pesan...';
+        }
+
+        // Event delegation untuk semua tombol menu pesan
+        document.addEventListener('click', function (e) {
+            const editMenu = e.target.closest('.edit-menu');
+            if (editMenu) {
+                e.stopPropagation();
+                const wrapper = editMenu.closest('[data-id]');
+                if (!wrapper) return;
+
+                const menu = wrapper.querySelector('.message-menu');
+                if (menu) {
+                    menu.classList.toggle('hidden');
+                    e.preventDefault();
+                }
+                return;
+            }
+
+            if (e.target.classList.contains('message-edit')) {
+                e.stopPropagation();
+                const wrapper = e.target.closest('[data-id]');
+                if (!wrapper) return;
+
+                const menu = wrapper.querySelector('.message-menu');
+                if (menu) menu.classList.add('hidden');
+
+                const isiLama = wrapper.dataset.isi || '';
+                const isiBaru = prompt('Edit pesan:', isiLama);
+                if (isiBaru !== null && isiBaru.trim() !== '' && isiBaru.trim() !== isiLama) {
+                    editPesan(wrapper.dataset.id, isiBaru.trim());
+                }
+                return;
+            }
+
+            if (e.target.classList.contains('message-delete')) {
+                e.stopPropagation();
+                const wrapper = e.target.closest('[data-id]');
+                if (!wrapper) return;
+
+                if (!confirm('Hapus pesan ini?')) return;
+
+                const menu = wrapper.querySelector('.message-menu');
+                if (menu) menu.classList.add('hidden');
+
+                hapusPesan(wrapper.dataset.id);
+                return;
+            }
+
+            // Tutup menu saat klik di luar
+            document.querySelectorAll('.message-menu').forEach(menu => {
+                if (!menu.contains(e.target) && !e.target.classList.contains('edit-menu')) {
+                    menu.classList.add('hidden');
+                }
+            });
+        });
     });
 </script>
 @endpush
